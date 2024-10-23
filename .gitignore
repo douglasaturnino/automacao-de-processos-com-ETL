@@ -197,5 +197,11 @@ site/
 
 # projeto
 data/
-
+etc/
+libext/
+projects/
+repository/
+server/
+user-assets/
+*.db
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode

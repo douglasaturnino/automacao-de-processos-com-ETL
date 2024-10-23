@@ -1,11 +1,11 @@
 # IMPORTS
 import logging
 import os
-import shutil
 import sqlite3
 
 import pandas as pd
-import requests
+
+from src.extract import DataExtractor
 
 # Configuração do logging
 log_format = "%(asctime)s - %(levelname)s - %(message)s"
@@ -32,38 +32,6 @@ ARQUIVOS = [
     "title.principals.tsv.gz",
     "title.ratings.tsv.gz",
 ]
-
-
-def extract(
-    base_url: str = BASE_URL,
-    arquivos: list = ARQUIVOS,
-    destino_diretorio: str = DESTINO_DIRETORIO,
-) -> None:
-    logging.info("Início do processo de ETL")
-    os.makedirs(destino_diretorio, exist_ok=True)
-
-    for arquivo in arquivos:
-        url = base_url + arquivo
-        caminho_destino = os.path.join(destino_diretorio, arquivo)
-
-        if not os.path.exists(caminho_destino):
-            logging.info(f"Baixando {arquivo}...")
-            response = requests.get(url, stream=True)
-
-            if response.status_code == 200:
-                with open(caminho_destino, "wb") as f:
-                    shutil.copyfileobj(response.raw, f)
-                logging.info(f"{arquivo} baixado com sucesso!")
-            else:
-                logging.error(
-                    f"Falha ao baixar {arquivo}. Código de status: {response.status_code}"
-                )
-
-            del response
-        else:
-            logging.info(f"{arquivo} já existe. Pulando o download.")
-
-    logging.info("Download concluído.")
 
 
 def transform(
@@ -208,7 +176,8 @@ def create_views(conexao) -> None:
 
 
 if __name__ == "__main__":
-    extract()
+    extractor = DataExtractor()
+    extractor.extract()
 
     transform()
 

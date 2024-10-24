@@ -12,15 +12,15 @@ class DataExtractor:
         self,
         base_url: str = config.BASE_URL,
         arquivos: list = config.ARQUIVOS,
-        destino_diretorio: str = config.DESTINO_DIRETORIO,
+        diretorio_dados: str = config.DIRETORIO_DADOS,
     ):
         self.base_url = base_url
         self.arquivos = arquivos
-        self.destino_diretorio = destino_diretorio
+        self.diretorio_dados = diretorio_dados
 
     def extract(self):
         logging.info("Inicio do processo de ETL")
-        os.makedirs(self.destino_diretorio, exist_ok=True)
+        os.makedirs(self.diretorio_dados, exist_ok=True)
 
         for arquivo in self.arquivos:
             self.download_file(arquivo)
@@ -29,7 +29,7 @@ class DataExtractor:
 
     def download_file(self, arquivo):
         url = os.path.join(self.base_url, arquivo)
-        caminho_destino = os.path.join(self.destino_diretorio, arquivo)
+        caminho_destino = os.path.join(self.diretorio_dados, arquivo)
 
         if not os.path.exists(caminho_destino):
             logging.info(f"Baixando {arquivo}...")

@@ -6,6 +6,7 @@ import sqlite3
 import pandas as pd
 
 from src.extract import DataExtractor
+from src.transform import DataTransformer
 
 # Configuração do logging
 log_format = "%(asctime)s - %(levelname)s - %(message)s"
@@ -32,51 +33,6 @@ ARQUIVOS = [
     "title.principals.tsv.gz",
     "title.ratings.tsv.gz",
 ]
-
-
-def transform(
-    arquivos: list = ARQUIVOS,
-    chunksize: int = 1_000_000,
-) -> None:
-    diretorio_dados = "data"
-    diretorio_tratados = os.path.join(diretorio_dados, "tratados")
-
-    os.makedirs(diretorio_tratados, exist_ok=True)
-
-    for arquivo in arquivos:
-        caminho_arquivo = os.path.join(diretorio_dados, arquivo)
-
-        if os.path.isfile(caminho_arquivo) and arquivo.endswith(".gz"):
-            logging.debug(f"Lendo e tratando o arquivo {arquivo}...")
-
-            chunks = pd.read_csv(
-                caminho_arquivo,
-                sep="\t",
-                compression="gzip",
-                low_memory=False,
-                chunksize=chunksize,
-            )
-
-            for chunk in chunks:
-                chunk.replace({"\\N": None}, inplace=True)
-
-                caminho_destino = os.path.join(diretorio_tratados, arquivo[:-3])
-                chunk.to_csv(
-                    caminho_destino,
-                    sep="\t",
-                    mode="a",
-                    index=False,
-                    header=not os.path.exists(caminho_destino),
-                )
-
-            logging.debug(
-                f"Tratamento concluído para {arquivo}. Arquivo tratado salvo em {caminho_destino}"
-            )
-
-            # Remova o arquivo baixado após o tratamento
-            os.remove(caminho_arquivo)
-
-    logging.info("Todos os arquivos foram tratados e salvos no diretório 'tratados'.")
 
 
 def load(conexao) -> None:
@@ -179,7 +135,8 @@ if __name__ == "__main__":
     extractor = DataExtractor()
     extractor.extract()
 
-    transform()
+    transformer = DataTransformer()
+    transformer.transform()
 
     conexao = sqlite3.connect(BANCO_DADOS)
 

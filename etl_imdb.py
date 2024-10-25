@@ -3,10 +3,10 @@ import logging
 import os
 import sqlite3
 
-import pandas as pd
-
 from src.extract import DataExtractor
 from src.transform import DataTransformer
+from src.load import DataLoader
+from src.config.config import config
 
 # Configuração do logging
 log_format = "%(asctime)s - %(levelname)s - %(message)s"
@@ -138,9 +138,10 @@ if __name__ == "__main__":
     transformer = DataTransformer()
     transformer.transform()
 
-    conexao = sqlite3.connect(BANCO_DADOS)
+    with sqlite3.connect(config.BANCO_DADOS) as conexao:
+        loader = DataLoader(conexao)
+        loader.load()
 
-    load(conexao=conexao)
     create_views(conexao=conexao)
 
     conexao.close()
